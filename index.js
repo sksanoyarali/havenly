@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import { Listing } from './models/listing.js'
 import path from 'path'
 import ejs from 'ejs'
+import ejsMate from 'ejs-mate'
 import methodOverride from 'method-override'
 import { fileURLToPath } from 'url'
 const port = 3000
@@ -11,12 +12,12 @@ const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
 app.use(methodOverride('_method'))
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
+app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
 // Middleware
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 async function main() {
