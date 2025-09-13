@@ -6,6 +6,7 @@ import ejs from 'ejs'
 import ejsMate from 'ejs-mate'
 import methodOverride from 'method-override'
 import { fileURLToPath } from 'url'
+import wrapAsync from './utils/wrapAsync.js'
 const port = 3000
 const app = express()
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
