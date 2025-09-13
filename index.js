@@ -41,11 +41,15 @@ app.get('/listings/new', async (req, res) => {
   res.render('listings/new.ejs')
 })
 
-app.post('/listings', async (req, res) => {
-  const listing = req.body.listing
-  const newListing = new Listing(listing)
-  await newListing.save()
-  res.redirect('/listings')
+app.post('/listings', async (req, res, next) => {
+  try {
+    const listing = req.body.listing
+    const newListing = new Listing(listing)
+    await newListing.save()
+    res.redirect('/listings')
+  } catch (error) {
+    next(error)
+  }
 })
 app.put('/listings/:id', async (req, res) => {
   const { id } = req.params
@@ -67,6 +71,10 @@ app.get('/listings/:id/edit', async (req, res) => {
   let { id } = req.params
   const listing = await Listing.findById(id)
   res.render('listings/edit.ejs', { listing })
+})
+
+app.use((err, req, res, next) => {
+  res.send('somthing went wrong')
 })
 app.listen(port, () => {
   console.log(`server is running on port:${port}`)
