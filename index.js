@@ -1,7 +1,8 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import { Listing } from './models/listing.js'
-import { listingSchema } from './schema.js'
+import { listingSchema, reviewSchema } from './schema.js'
+import { Review } from './models/review.js'
 import path from 'path'
 import ejs from 'ejs'
 import ejsMate from 'ejs-mate'
@@ -36,6 +37,14 @@ main()
 
 const validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body)
+  if (error) {
+    throw new ExpressError(400, error)
+  } else {
+    next()
+  }
+}
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body)
   if (error) {
     throw new ExpressError(400, error)
   } else {
@@ -84,7 +93,7 @@ app.get(
   '/listings/:id',
   wrapAsync(async (req, res) => {
     let { id } = req.params
-    const listing = await Listing.findById(id)
+    const listing = await Listing.findById(id).populate('reviews')
     res.render('listings/show.ejs', { listing })
   })
 )
@@ -103,6 +112,23 @@ app.get(
     let { id } = req.params
     const listing = await Listing.findById(id)
     res.render('listings/edit.ejs', { listing })
+  })
+)
+//reviews post route
+app.post(
+  '/listings/:id/reviews',
+  validateReview,
+  wrapAsync(async (req, res) => {
+    const { id } = req.params
+    const listing = await Listing.findById(id)
+    // if(listing){
+    //   throw ExpressError(404,"I")
+    // }
+    let newReview = new Review(req.body.review)
+    listing.reviews.push(newReview)
+    await newReview.save()
+    await listing.save()
+    res.redirect('/listings/' + id)
   })
 )
 app.all(/.*/, (req, res, next) => {
