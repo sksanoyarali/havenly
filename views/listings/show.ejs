@@ -2,7 +2,7 @@
 
 <div class="row">
   <div class="col-8 offset-2">
-    <h1 class="mb-4">Listing Details</h1>
+    <h1 class="mb-4"><%= listing.title %></h1>
 
     <!-- Card -->
     <div class="card mb-3">
@@ -12,7 +12,6 @@
         alt="listing_image"
       />
       <div class="card-body">
-        <h5 class="card-title"><%= listing.title %></h5>
         <p class="card-text"><%= listing.description %></p>
         <p class="card-text">
           <small class="text-muted"
