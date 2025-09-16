@@ -1,15 +1,13 @@
 import express from 'express'
 import mongoose from 'mongoose'
-import { Listing } from './models/listing.js'
-import { listingSchema, reviewSchema } from './schema.js'
-import { Review } from './models/review.js'
 import path from 'path'
 import ejs from 'ejs'
 import ejsMate from 'ejs-mate'
 import methodOverride from 'method-override'
 import { fileURLToPath } from 'url'
-import wrapAsync from './utils/wrapAsync.js'
 import ExpressError from './utils/expressError.js'
+import listingRouter from './routes/listing.routes.js'
+import reviewRouter from './routes/review.routes.js'
 const port = 3000
 const app = express()
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
@@ -35,102 +33,13 @@ main()
     console.log('Database connection error', err)
   })
 
-const validateListing = (req, res, next) => {
-  let { error } = listingSchema.validate(req.body)
-  if (error) {
-    throw new ExpressError(400, error)
-  } else {
-    next()
-  }
-}
-const validateReview = (req, res, next) => {
-  let { error } = reviewSchema.validate(req.body)
-  if (error) {
-    throw new ExpressError(400, error)
-  } else {
-    next()
-  }
-}
 app.get('/', (req, res) => {
   console.log('hi i am route')
 })
-app.get(
-  '/listings',
-  wrapAsync(async (req, res) => {
-    const allListings = await Listing.find({})
-    res.render('listings/index.ejs', { allListings })
-  })
-)
-
-app.get(
-  '/listings/new',
-  wrapAsync(async (req, res) => {
-    res.render('listings/new.ejs')
-  })
-)
-
-app.post(
-  '/listings',
-  validateListing,
-  wrapAsync(async (req, res, next) => {
-    const listing = req.body.listing
-    const newListing = new Listing(listing)
-    await newListing.save()
-    res.redirect('/listings')
-  })
-)
-app.put(
-  '/listings/:id',
-  validateListing,
-  wrapAsync(async (req, res) => {
-    const { id } = req.params
-
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing })
-    res.redirect(`/listings/${id}`)
-  })
-)
-app.get(
-  '/listings/:id',
-  wrapAsync(async (req, res) => {
-    let { id } = req.params
-    const listing = await Listing.findById(id).populate('reviews')
-    res.render('listings/show.ejs', { listing })
-  })
-)
-//deleteroute
-app.delete(
-  '/listings/:id',
-  wrapAsync(async (req, res) => {
-    const { id } = req.params
-    let deletedListing = await Listing.findByIdAndDelete(id)
-    res.redirect('/listings')
-  })
-)
-app.get(
-  '/listings/:id/edit',
-  wrapAsync(async (req, res) => {
-    let { id } = req.params
-    const listing = await Listing.findById(id)
-    res.render('listings/edit.ejs', { listing })
-  })
-)
+app.use('/listings', listingRouter)
+app.use('/listings/:id/reviews', reviewRouter)
 //reviews post route
-app.post(
-  '/listings/:id/reviews',
-  validateReview,
-  wrapAsync(async (req, res) => {
-    const { id } = req.params
-    const listing = await Listing.findById(id)
-    // if(listing){
-    //   throw ExpressError(404,"I")
-    // }
-    let newReview = new Review(req.body.review)
-    listing.reviews.push(newReview)
-    await newReview.save()
-    await listing.save()
-    res.redirect('/listings/' + id)
-  })
-)
+
 app.all(/.*/, (req, res, next) => {
   next(new ExpressError(404, 'Page not found'))
 })
