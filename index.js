@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import ExpressError from './utils/expressError.js'
 import listingRouter from './routes/listing.routes.js'
 import reviewRouter from './routes/review.routes.js'
+import session from 'express-session'
 const port = 3000
 const app = express()
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
@@ -32,7 +33,12 @@ main()
   .catch((err) => {
     console.log('Database connection error', err)
   })
-
+const sessionOptions = {
+  secret: 'mysupersecret',
+  resave: false,
+  saveUninitialized: true,
+}
+app.use(session(sessionOptions))
 app.get('/', (req, res) => {
   console.log('hi i am route')
 })
