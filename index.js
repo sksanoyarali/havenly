@@ -9,6 +9,7 @@ import ExpressError from './utils/expressError.js'
 import listingRouter from './routes/listing.routes.js'
 import reviewRouter from './routes/review.routes.js'
 import session from 'express-session'
+import flash from 'connect-flash'
 const port = 3000
 const app = express()
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
@@ -43,9 +44,15 @@ const sessionOptions = {
     httpOnly: true,
   },
 }
-app.use(session(sessionOptions))
 app.get('/', (req, res) => {
-  console.log('hi i am route')
+  res.send('hi i am route')
+})
+app.use(session(sessionOptions))
+app.use(flash())
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success')
+  res.locals.error = req.flash('error')
+  next()
 })
 app.use('/listings', listingRouter)
 app.use('/listings/:id/reviews', reviewRouter)
