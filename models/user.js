@@ -1,4 +1,3 @@
-import { required } from 'joi'
 import mongoose, { Schema } from 'mongoose'
 
 import passportLocalMongoosse from 'passport-local-mongoose'
@@ -9,6 +8,6 @@ const userSchema = new Schema({
     required: true,
   },
 })
-User.plugin(passportLocalMongoosse)
+userSchema.plugin(passportLocalMongoosse)
 const User = mongoose.model('User', userSchema)
 export default User

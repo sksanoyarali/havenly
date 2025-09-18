@@ -8,8 +8,12 @@ import { fileURLToPath } from 'url'
 import ExpressError from './utils/expressError.js'
 import listingRouter from './routes/listing.routes.js'
 import reviewRouter from './routes/review.routes.js'
+import userRouter from './routes/user.routes.js'
 import session from 'express-session'
 import flash from 'connect-flash'
+import User from './models/user.js'
+import passport from 'passport'
+import { Strategy as LocalStrategy } from 'passport-local'
 const port = 3000
 const app = express()
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
@@ -21,6 +25,7 @@ app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
 // Middleware
+
 app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -49,13 +54,32 @@ app.get('/', (req, res) => {
 })
 app.use(session(sessionOptions))
 app.use(flash())
+app.use(passport.initialize())
+app.use(passport.session())
+
+// plug in local strategy
+passport.use(new LocalStrategy(User.authenticate()))
+
+// serialize / deserialize users
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
 app.use((req, res, next) => {
   res.locals.success = req.flash('success')
   res.locals.error = req.flash('error')
+  res.locals.currUser = req.user
   next()
+})
+app.get('/demouser', async (req, res) => {
+  let fakeUser = new User({
+    email: 'sonu@gmail.com',
+    username: 'sanoyar333',
+  })
+  const newUser = await User.register(fakeUser, 'hello world')
+  res.send(newUser)
 })
 app.use('/listings', listingRouter)
 app.use('/listings/:id/reviews', reviewRouter)
+app.use('/', userRouter)
 //reviews post route
 
 app.all(/.*/, (req, res, next) => {
