@@ -1,3 +1,5 @@
+import { Listing } from './models/listing.js'
+
 const isLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     //save redirectUrl
@@ -13,4 +15,13 @@ const saveRedirectUrl = (req, res, next) => {
   }
   next()
 }
-export { isLoggedIn, saveRedirectUrl }
+const isOwner = async (req, res, next) => {
+  let { id } = req.params
+  let listing = await Listing.findById(id)
+  if (!listing.owner._id.equals(res.locals.currUser._id)) {
+    req.flash('error', 'You dont have permission to edit')
+    return res.redirect(`/listings/${id}`)
+  }
+  next()
+}
+export { isLoggedIn, saveRedirectUrl, isOwner }

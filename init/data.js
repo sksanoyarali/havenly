@@ -261,4 +261,4 @@ const sampleListings = [
   // },
 ]
 
-export const data = sampleListings
+export let data = sampleListings
