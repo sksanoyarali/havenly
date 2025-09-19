@@ -22,21 +22,18 @@ const validateListing = (req, res, next) => {
     next()
   }
 }
-
-router.get('/', wrapAsync(showAllListing))
+router
+  .route('/')
+  .get(wrapAsync(showAllListing))
+  .post(isLoggedIn, validateListing, wrapAsync(registerNewListing))
 
 router.get('/new', isLoggedIn, wrapAsync(renderNewForm))
 
-router.post('/', isLoggedIn, validateListing, wrapAsync(registerNewListing))
-router.put(
-  '/:id',
-  isLoggedIn,
-  isOwner,
-  validateListing,
-  wrapAsync(updateListing)
-)
-router.get('/:id', wrapAsync(showListing))
-//deleteroute
-router.delete('/:id', isLoggedIn, isOwner, wrapAsync(deleteListing))
+router
+  .route('/:id')
+  .put(isLoggedIn, isOwner, validateListing, wrapAsync(updateListing))
+  .get(wrapAsync(showListing))
+  .delete(isLoggedIn, isOwner, wrapAsync(deleteListing))
+
 router.get('/:id/edit', isLoggedIn, wrapAsync(renderUpdateListingForm))
 export default router
