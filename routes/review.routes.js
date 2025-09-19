@@ -5,6 +5,10 @@ import { Listing } from '../models/listing.js'
 import ExpressError from '../utils/expressError.js'
 import { reviewSchema } from '../schema.js'
 import { isLoggedIn, isReviewAuthor } from '../middleware.js'
+import {
+  createNewReview,
+  deletReview,
+} from '../controllers/review.controller.js'
 const validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body)
   if (error) {
@@ -14,38 +18,7 @@ const validateReview = (req, res, next) => {
   }
 }
 const router = express.Router({ mergeParams: true })
-router.post(
-  '/',
-  isLoggedIn,
-  validateReview,
-  wrapAsync(async (req, res) => {
-    const { id } = req.params
-    const listing = await Listing.findById(id)
-    // if(listing){
-    //   throw ExpressError(404,"I")
-    // }
-    let newReview = new Review(req.body.review)
-    newReview.author = req.user._id
-    console.log(newReview)
-
-    listing.reviews.push(newReview)
-    await newReview.save()
-    await listing.save()
-    req.flash('success', 'New Review created')
-    res.redirect('/listings/' + id)
-  })
-)
+router.post('/', isLoggedIn, validateReview, wrapAsync(createNewReview))
 //delete review route
-router.delete(
-  '/:reviewId',
-  isLoggedIn,
-  isReviewAuthor,
-  wrapAsync(async (req, res) => {
-    let { id, reviewId } = req.params
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
-    await Review.findByIdAndDelete(reviewId)
-    req.flash('success', 'review deleted successfully')
-    res.redirect(`/listings/${id}`)
-  })
-)
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, wrapAsync(deletReview))
 export default router
