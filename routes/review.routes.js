@@ -4,6 +4,7 @@ import { Review } from '../models/review.js'
 import { Listing } from '../models/listing.js'
 import ExpressError from '../utils/expressError.js'
 import { reviewSchema } from '../schema.js'
+import { isLoggedIn, isReviewAuthor } from '../middleware.js'
 const validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body)
   if (error) {
@@ -15,6 +16,7 @@ const validateReview = (req, res, next) => {
 const router = express.Router({ mergeParams: true })
 router.post(
   '/',
+  isLoggedIn,
   validateReview,
   wrapAsync(async (req, res) => {
     const { id } = req.params
@@ -23,6 +25,9 @@ router.post(
     //   throw ExpressError(404,"I")
     // }
     let newReview = new Review(req.body.review)
+    newReview.author = req.user._id
+    console.log(newReview)
+
     listing.reviews.push(newReview)
     await newReview.save()
     await listing.save()
@@ -33,6 +38,8 @@ router.post(
 //delete review route
 router.delete(
   '/:reviewId',
+  isLoggedIn,
+  isReviewAuthor,
   wrapAsync(async (req, res) => {
     let { id, reviewId } = req.params
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
