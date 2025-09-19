@@ -1,4 +1,4 @@
-import User from '../models/user'
+import User from '../models/user.js'
 
 const renderSignupForm = (req, res) => {
   res.render('users/signup.ejs')
@@ -38,4 +38,4 @@ const logoutUser = (req, res, next) => {
     res.redirect('/listings')
   })
 }
-export { signupUser, renderSignupForm, loginUser, logoutUser }
+export { signupUser, renderSignupForm, renderLoginForm, loginUser, logoutUser }
