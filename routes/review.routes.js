@@ -1,7 +1,5 @@
 import express from 'express'
 import wrapAsync from '../utils/wrapAsync.js'
-import { Review } from '../models/review.js'
-import { Listing } from '../models/listing.js'
 import ExpressError from '../utils/expressError.js'
 import { reviewSchema } from '../schema.js'
 import { isLoggedIn, isReviewAuthor } from '../middleware.js'

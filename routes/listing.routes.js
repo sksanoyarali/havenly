@@ -1,6 +1,8 @@
 import express from 'express'
 import wrapAsync from '../utils/wrapAsync.js'
-import { Listing } from '../models/listing.js'
+import multer from 'multer'
+import { cloudinary, storage } from '../cloudConfig.js'
+const upload = multer({ storage })
 import ExpressError from '../utils/expressError.js'
 import { listingSchema } from '../schema.js'
 import { isLoggedIn, isOwner } from '../middleware.js'
@@ -25,7 +27,12 @@ const validateListing = (req, res, next) => {
 router
   .route('/')
   .get(wrapAsync(showAllListing))
-  .post(isLoggedIn, validateListing, wrapAsync(registerNewListing))
+  .post(
+    isLoggedIn,
+    validateListing,
+    upload.single('listing[image]'),
+    wrapAsync(registerNewListing)
+  )
 
 router.get('/new', isLoggedIn, wrapAsync(renderNewForm))
 
@@ -37,3 +44,5 @@ router
 
 router.get('/:id/edit', isLoggedIn, wrapAsync(renderUpdateListingForm))
 export default router
+
+//

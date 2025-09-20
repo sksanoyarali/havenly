@@ -1,5 +1,7 @@
 import express from 'express'
 import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+dotenv.config()
 import path from 'path'
 import ejs from 'ejs'
 import ejsMate from 'ejs-mate'
@@ -16,6 +18,7 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 const port = 3000
 const app = express()
+
 const MONGO_URL = 'mongodb://127.0.0.1:27017/havenly'
 app.use(methodOverride('_method'))
 const __filename = fileURLToPath(import.meta.url)
@@ -28,6 +31,7 @@ app.set('views', path.join(__dirname, 'views'))
 
 app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
+
 app.use(express.json())
 async function main() {
   await mongoose.connect(MONGO_URL)
